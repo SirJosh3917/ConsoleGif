@@ -36,6 +36,12 @@ $text = str_replace("%ip", $_SERVER['REMOTE_ADDR'], $text);
 //Set this to the length of the text
 $strlentext = strlen($text);
 
+//If the text is greater than 60, we'll crop it to size.
+if($strlentext > 60) {
+	$text = substr($text, 0, 60);
+$strlentext = strlen($text);
+}
+
 if(isset($_GET["hex"])) {
 	$hex = $_GET["hex"];
 }
