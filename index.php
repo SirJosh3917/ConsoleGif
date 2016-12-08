@@ -12,6 +12,8 @@ $FontWidth = 8;
 $FontWidthAdd = 16;
 $DurationText = 10;
 $DurationCursor = 50;
+$CacheFolder = "Cache\\";
+$CacheFiles = true;
 
 //Set default values
 $text = "C:\\>ping %ip -n 4"; //Console Text
@@ -20,6 +22,7 @@ $frames = array(); //GIF Frames
 $durations = array(); //Duration of each frame
 $col = true;
 $durationTime = $DurationText;
+$canBeCached = $CacheFiles;
 
 //Parse $_GET
 if(isset($_GET["val"])) {
@@ -28,6 +31,11 @@ if(isset($_GET["val"])) {
 
 if(isset($_GET["hex"])) {
 	$hex = $_GET["hex"];
+}
+
+//Check if we can cache the file
+if (strpos($text, '%ip') !== false) {
+    $canBeCached = false;
 }
 
 //Parse the text
@@ -39,7 +47,18 @@ $strlentext = strlen($text);
 //If the text is greater than 60, we'll crop it to size.
 if($strlentext > 60) {
 	$text = substr($text, 0, 60);
-$strlentext = strlen($text);
+	$strlentext = strlen($text);
+}
+
+//If the file can be cached
+if($canBeCached) {
+	//Hash the query string (which is 60 or less, so we can use a hash that gives small strings)
+	$hashName = hash("ripemd160", $text);
+	$path = $CacheFolder . $hashName . ".gif";
+	if(file_exists($path)) {
+		echo file_get_contents($path);
+		exit;
+	}
 }
 
 if(isset($_GET["hex"])) {
@@ -102,6 +121,11 @@ header('Content-Disposition: filename="console.gif"');
 
 //Tell the client about the gif.
 echo $gifBinary;
+
+//Cache the file
+if($canBeCached) {
+	file_put_contents($path, $gifBinary);
+}
 
 //Destroy the gif
 imagedestroy($gifBinary);
