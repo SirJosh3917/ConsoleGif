@@ -58,7 +58,11 @@ if($strlentext > 60) {
 //If the file can be cached
 if($canBeCached) {
 	//Hash the query string (which is 60 or less, so we can use a hash that gives small strings)
-	$hashName = hash("ripemd160", $text . $_GET["hex"]);
+	if(isset($_GET["hex"])) {
+		$hashName = hash("ripemd160", $text . $_GET["hex"]);
+	} else {
+		$hashName = hash("ripemd160", $text);
+	}
 	$path = $CacheFolder . $hashName . ".gif";
 	if(file_exists($path)) {
 		//Set headers for outputting the gif
