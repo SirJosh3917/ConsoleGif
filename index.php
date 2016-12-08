@@ -13,6 +13,7 @@ $FontWidthAdd = 16;
 $DurationText = 10;
 $DurationCursor = 50;
 $CacheFolder = "Cache\\";
+$CacheWebsiteFolder = "http://www.example.com/cache/";
 $CacheFiles = true;
 
 //Set default values
@@ -23,6 +24,7 @@ $durations = array(); //Duration of each frame
 $col = true;
 $durationTime = $DurationText;
 $canBeCached = $CacheFiles;
+$redirectCached = false;
 
 //Parse $_GET
 if(isset($_GET["val"])) {
@@ -55,6 +57,14 @@ if($strlentext > 60) {
 	$strlentext = strlen($text);
 }
 
+//All parsing has been done so canBeCached is now O.K. to use
+if(isset($_GET["cache"]) && $canBeCached) {
+	if(strlen($_GET["cache"]) > 0) {
+		//We'll redirect to the cached file
+		$redirectCached = true;
+	}
+}
+
 //If the file can be cached
 if($canBeCached) {
 	//Hash the query string (which is 60 or less, so we can use a hash that gives small strings)
@@ -65,6 +75,12 @@ if($canBeCached) {
 	}
 	$path = $CacheFolder . $hashName . ".gif";
 	if(file_exists($path)) {
+		
+		if($redirectCached) {
+			header("Location: " . $CacheWebsiteFolder . $hashName . ".gif");
+			exit;
+		}
+		
 		//Set headers for outputting the gif
 		header('Content-type: image/gif');
 		header('Content-Disposition: filename="console.gif"');
