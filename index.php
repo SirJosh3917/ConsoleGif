@@ -30,6 +30,11 @@ if(isset($_GET["val"])) {
 }
 
 if(isset($_GET["hex"])) {
+	//Prevent way-too-long hexes
+	if(strlen($_GET["hex"]) > 10) {
+		die("Too long of a hex.");
+	}
+	
 	$hex = $_GET["hex"];
 }
 
@@ -53,12 +58,19 @@ if($strlentext > 60) {
 //If the file can be cached
 if($canBeCached) {
 	//Hash the query string (which is 60 or less, so we can use a hash that gives small strings)
-	$hashName = hash("ripemd160", $text);
+	$hashName = hash("ripemd160", $text . $_GET["hex"]);
 	$path = $CacheFolder . $hashName . ".gif";
 	if(file_exists($path)) {
+		//Set headers for outputting the gif
+		header('Content-type: image/gif');
+		header('Content-Disposition: filename="console.gif"');
+		
+		//Display the gif and exit
 		echo file_get_contents($path);
 		exit;
 	}
+	
+	//We will have to cache it once we generate it.
 }
 
 if(isset($_GET["hex"])) {
@@ -113,7 +125,6 @@ $gc->create($frames, $durations, $strlentext + 1);
 
 //Get the binary
 $gifBinary = $gc->getGif();
-
 
 //Set headers for outputting the gif
 header('Content-type: image/gif');
